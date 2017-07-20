@@ -46,6 +46,7 @@ int fase, inverte, velocidade;
 
 void setup() {
   Serial.begin(9600);
+  Serial.write('\1');
 
   pinMode(besquerdo, INPUT); //botão esquerdo
   pinMode(bdireito, INPUT);  //Botão direito
@@ -70,7 +71,6 @@ void loop() {
   //zeramento();
 
   recebeInt(&fase);
-
   switch (fase) {
   case 0:
     fase0();
