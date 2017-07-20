@@ -1,11 +1,6 @@
-import serial
+import serial, math, platform, os, time, sys, struct
 import serial.tools.list_ports as list_ports
 from collections import deque
-import math
-import platform, os
-import time
-import sys
-import struct
  
 class BreakInterrupt(Exception):
   pass
