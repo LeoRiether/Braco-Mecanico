@@ -21,9 +21,9 @@ def send(f, n):
   arduino.write(struct.pack(formats[f.__name__], f(n))) 
   arduino.read(1)
 
-def send_angulos(f, s):
-  arduino.write(struct.pack('>f', math.degrees(float(s[0])))) # who cares about readability, right?
-  arduino.write(struct.pack('>f', math.degrees(float(s[1])))) 
+def send_angulos(a0, a1):
+  arduino.write(struct.pack('>f', math.degrees(float(a0)))) # who cares about readability, right?
+  arduino.write(struct.pack('>f', math.degrees(float(a1)))) 
   arduino.read(1)
  
 def send_sequence(f, s):
