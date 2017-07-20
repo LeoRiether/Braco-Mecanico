@@ -69,17 +69,6 @@ void loop() {
   //Zeramento Manual(possível automatização do processo com infravermelho
   //zeramento();
 
-
-  // recebeInt(&fase);
-  // recebeInt(&inverte);
-  // recebeFloat(&m);
-  // recebeFloat(&n);
-  // Serial.println(fase);
-  // Serial.println(inverte);
-  // Serial.println(m);
-  // Serial.println(n);
-  // return;
-
   recebeInt(&fase);
 
   switch (fase) {
@@ -106,6 +95,7 @@ void fase0() {
   i = 0;
   j = 0;
 
+  //recebeAngulos(&m, &n);
   recebeFloat(&m);
   recebeFloat(&n);
 
@@ -145,8 +135,7 @@ void fase1() {
   inverte = '0';
 
   recebeInt(&inverte);
-  recebeFloat(&m);
-  recebeFloat(&n);
+  recebeAngulos(&m, &n);
   // Serial.print(inverte); Serial.print(' ');
   // Serial.print(m); Serial.print(' ');
   // Serial.print(n); Serial.print(' ');
@@ -225,8 +214,7 @@ void fase2() {
   //   velocidade = Serial.readString();
   //=> recebeInt(&velocidade); // Velocidade não é float?
 
-  recebeFloat(&m);
-  recebeFloat(&n);
+  recebeAngulos(&m, &n);
 
   t1 = T;
   t2 = T;
@@ -257,8 +245,7 @@ void fase3() {
   i = 0;
   j = 0;
 
-  recebeFloat(&m);
-  recebeFloat(&n);
+  recebeAngulos(&m, &n);
 
   mm = abs(m) + 1;
   nn = abs(n) + 1;
@@ -580,6 +567,15 @@ void recebeFloat(float *r) {
     delay(50);
   }
   *r = serialToFloat();
+  Serial.write('\1');
+}
+
+void recebeAngulos(float* a0, float* a1) {
+  while (!Serial.available()) {
+    delay(50);
+  }
+  *a0 = serialToFloat();
+  *a1 = serialToFloat();
   Serial.write('\1');
 }
 

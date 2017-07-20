@@ -1,6 +1,7 @@
 import serial, math, platform, os, time, sys, struct
 import serial.tools.list_ports as list_ports
 from collections import deque
+import drawings
  
 class BreakInterrupt(Exception):
   pass
@@ -19,12 +20,16 @@ def send(f, n):
   # print('!', struct.pack(formats[f.__name__], f(n)))
   arduino.write(struct.pack(formats[f.__name__], f(n))) 
   arduino.read(1)
+
+def send_angulos(f, s):
+  arduino.write(struct.pack('>f', math.degrees(float(s[0])))) # who cares about readability, right?
+  arduino.write(struct.pack('>f', math.degrees(float(s[1])))) 
+  arduino.read(1)
  
 def send_sequence(f, s):
   send(int, len(s))
   for i in s:
-    send(f, i[0])
-    send(f, i[1])
+    send_angulos(i[0], i[1])
   arduino.read(1)
     
  
@@ -122,8 +127,7 @@ try:
  
       if fase == '1': 
         send(int, inverte)
-      send(float, math.degrees(angulo1))
-      send(float, math.degrees(angulo2))
+      send_angulos(angulo1, angulo2)
 except (KeyboardInterrupt, BreakInterrupt):
   print('Stopping process...')
 except serial.serialutil.SerialException:
