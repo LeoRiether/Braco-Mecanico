@@ -1,2 +1,3 @@
 def line():
+    pass
   
