@@ -5,7 +5,11 @@ import drawings
  
 class BreakInterrupt(Exception):
   pass
+
+class RestartInterrupt(Exception):
+  pass
  
+
 def clscr():
   if platform.system() == 'Windows':
     _=os.system('cls')
@@ -32,10 +36,13 @@ def send_sequence(f, s):
     send_angulos(i[0], i[1])
   arduino.read(1)
 
+
 def uinput(p):
   x = input(p)
   if x == 'sair':
     raise BreakInterrupt()
+  elif x == 'restart':
+    raise RestartInterrupt()
   return x
 
 
@@ -78,18 +85,18 @@ def coord_to_ang(x, y):
 
 
 def fase0():
-  angulo1 = uinput('Entre o angulo1 (Digite sair para fechar): ')
+  angulo1 = uinput('Entre o angulo1: ')
   send(float, angulo1)
 
-  angulo2 = uinput('Entre o angulo2 (Digite sair para fechar): ')
+  angulo2 = uinput('Entre o angulo2: ')
   send(float, angulo2)
 
 
 def fase_coord(fase):
   z = 10  # Valor para garanir que o programa entrará no while
   while z<r1 or z>r2:
-      x = int(uinput('Entre com o valor de x (Digite sair para fechar): '))
-      y = int(uinput('Entre com o valor de y (Digite sair para fechar): '))
+      x = int(uinput('Entre com o valor de x: '))
+      y = int(uinput('Entre com o valor de y: '))
     
       if 160 >= x > 0 and 160 > y > -160:  # Segunda condição de checagem para garantir
           z = math.sqrt(x*x + y*y)         # que os pontos estejam na área de trabalho
@@ -103,9 +110,6 @@ def fase_coord(fase):
   send_angulos(angulo1, angulo2)
 
 
-def genseq(a):
-  return [(math.radians(i[0]), math.radians(i[1])) for i in [(a, -2*a), (-2*a, 4*a), (a, -2*a)]]
-
 def fase4():
   #s = eval(uinput('Digite a sequência de coordenadas: '))
   s = [
@@ -115,7 +119,7 @@ def fase4():
     (160, 0)
   ]
   #send_sequence(float, [ coord_to_ang(*i) for i in s ])
-  send_sequence(float, genseq(45))
+  send_sequence(float, drawings.line(coord_to_ang))
 
 
 if '--com' in sys.argv:
@@ -129,44 +133,68 @@ else:
  
 # Inicialização do Serial
 arduino = serial.Serial(anm, 9600)
- 
 arduino.read(1)  # Espera o arduino restartar
 
-try:
-  while True:
 
-    while 0xff > 0b100:
-      if lf:
-        fase = uinput('Defina a fase (Aperte enter para fase {lf}): '.format(lf=lf))
-      else:
-        fase = uinput('Defina a fase: ')
+faseargv = None
+if '--fase' in sys.argv:
+  faseargv = int(sys.argv[sys.argv.index('--fase')+1])
 
-      if fase == '':
-        fase = lf
-      
-      fase = int(fase)
-      if fase < 0 or fase > 4:
-        print('A fase deve estar entre 0 e 4')
-        fase = False
-      else:
-        lf = fase
-        break
 
-    send(int, fase)
-      
-    # Recebe 2 ângulos e manda pelo serial
-    if fase == 0:
-        fase0()
-    # Recebe um valor de coordenadas e manda os ângulos correspondentes pelo serial
-    elif 0 < fase < 4:
-      fase_coord(fase)
-    # Recebe uma sequência de coordenadas e manda os ângulos correspondentes pelo serial
-    elif fase == 4:
-      fase4()
-      
-except (KeyboardInterrupt, BreakInterrupt):
-  print('Stopping process...')
-except serial.serialutil.SerialException:
-  print('Serial exception... Open=' + str(arduino.is_open))
-finally:
-  if arduino.is_open: arduino.close()
+def restart():
+  clscr()
+  arduino.close()
+  arduino.open()
+  arduino.read(1)
+
+def loop():
+  global lf
+  global faseargv
+
+  fase = faseargv if faseargv != None else 5
+
+  while faseargv == None:
+    if lf:
+      fase = uinput('Defina a fase (Aperte enter para fase {lf}): '.format(lf=lf))
+    else:
+      fase = uinput('Defina a fase: ')
+
+    if fase == '':
+      fase = lf
+    
+    fase = int(fase)
+    if fase < 0 or fase > 4:
+      print('A fase deve estar entre 0 e 4')
+      fase = False
+    else:
+      lf = fase
+      break
+
+  send(int, fase)
+    
+  # Recebe 2 ângulos e manda pelo serial
+  if fase == 0:
+      fase0()
+  # Recebe um valor de coordenadas e manda os ângulos correspondentes pelo serial
+  elif 0 < fase < 4:
+    fase_coord(fase)
+  # Recebe uma sequência de coordenadas e manda os ângulos correspondentes pelo serial
+  elif fase == 4:
+    fase4()
+
+def main():
+  try:
+    while True:
+      loop()
+  except (KeyboardInterrupt, BreakInterrupt):
+    print('Stopping process...')
+  except serial.serialutil.SerialException:
+    print('Serial exception... Open=' + str(arduino.is_open))
+  except RestartInterrupt:
+    print('Restarting...')
+    restart()
+    main()
+  finally:
+    if arduino.is_open: arduino.close()
+
+main()
