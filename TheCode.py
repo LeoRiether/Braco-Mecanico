@@ -103,6 +103,9 @@ def fase_coord(fase):
   send_angulos(angulo1, angulo2)
 
 
+def genseq(a):
+  return [(math.radians(i[0]), math.radians(i[1])) for i in [(a, -2*a), (-2*a, 4*a), (a, -2*a)]]
+
 def fase4():
   #s = eval(uinput('Digite a sequência de coordenadas: '))
   s = [
@@ -112,7 +115,7 @@ def fase4():
     (160, 0)
   ]
   #send_sequence(float, [ coord_to_ang(*i) for i in s ])
-  send_sequence(float, [(math.radians(i[0]), math.radians(i[1])) for i in [(30, -60), (-60, 120), (30, -60)]])
+  send_sequence(float, genseq(45))
 
 
 if '--com' in sys.argv:
