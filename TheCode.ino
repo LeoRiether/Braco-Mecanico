@@ -84,6 +84,9 @@ void loop() {
   case 3:
     fase3();
     break;
+  case 4:
+    fase4();
+    break;
   default:
     NBLINK(5)
     break;
@@ -281,6 +284,15 @@ void fase3() {
     rotateduplo(H1, H2);
   }
 }
+
+void fase4() {
+  int len;
+  for (recebeInt(&len); len--; ) {
+    fase3();
+  }
+  Serial.write('\1');
+}
+
 /////////////////////////////////////// ZERAMENTO ////////////////////////
 void zeramento() {
   if (zerado == 0) {
